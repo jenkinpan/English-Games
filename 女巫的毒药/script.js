@@ -176,7 +176,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // 【修改点】不透露数量，保持神秘
-    gameStatus.textContent = "🎮 游戏开始！全班轮流读单词并点击";
+    gameStatus.textContent = "🎮 游戏开始！读单词并点击";
     gameStatus.style.color = "#4ecdc4";
   }
 
