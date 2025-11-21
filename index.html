@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>英语游戏合集</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont,
+        "PingFang SC", "Microsoft Yahei", sans-serif;
+      --accent: #5c6ac4;
+      --accent-dark: #4a57a1;
+      --bg: #f7f8fc;
+      --card: #ffffff;
+      --text: #1e1e1e;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 16px 80px;
+      background-image: radial-gradient(circle at 20% 20%,
+          rgba(92, 106, 196, 0.08),
+          transparent 30%),
+        radial-gradient(circle at 80% 0%,
+          rgba(74, 87, 161, 0.08),
+          transparent 25%);
+    }
+
+    header {
+      text-align: center;
+      max-width: 640px;
+      margin-bottom: 32px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 5vw, 3rem);
+      letter-spacing: 0.02em;
+    }
+
+    p.description {
+      margin: 0;
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: rgba(0, 0, 0, 0.7);
+    }
+
+    main.grid {
+      flex: 1;
+    }
+
+    .grid {
+      width: 100%;
+      max-width: 1080px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 24px;
+      text-decoration: none;
+      color: inherit;
+      box-shadow: 0 15px 45px rgba(51, 64, 97, 0.15);
+      transition: transform 180ms ease, box-shadow 180ms ease;
+      border: 1px solid rgba(92, 106, 196, 0.12);
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 22px 55px rgba(51, 64, 97, 0.22);
+    }
+
+    .card h2 {
+      margin: 0 0 8px;
+      font-size: 1.4rem;
+    }
+
+    .card p {
+      margin: 0;
+      font-size: 0.98rem;
+      color: rgba(0, 0, 0, 0.7);
+      line-height: 1.5;
+    }
+
+    footer {
+      width: 100%;
+      max-width: 1080px;
+      margin-top: auto;
+      padding-top: 48px;
+      font-size: 0.9rem;
+      color: rgba(0, 0, 0, 0.6);
+      text-align: center;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f1119;
+        --card: #1a1f2f;
+        --text: #f4f5fb;
+      }
+
+      .card p,
+      p.description,
+      footer {
+        color: rgba(244, 245, 251, 0.75);
+      }
+
+      .card {
+        border-color: rgba(255, 255, 255, 0.08);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>英语互动游戏中心</h1>
+    <p class="description">
+      选择一个你喜欢的小游戏，进入对应页面开始闯关，用游戏的方式轻松巩固词汇与语法。
+    </p>
+  </header>
+
+  <main class="grid">
+    <a class="card" href="Bomb%20Game/%E5%8D%95%E8%AF%8D%E7%82%B8%E5%BC%B9%E6%B8%B8%E6%88%8F.html">
+      <h2>单词炸弹</h2>
+      <p>在倒计时压力下快速输入正确单词，避免炸弹爆炸！</p>
+    </a>
+
+    <a class="card" href="Flashcard/%E5%8D%95%E8%AF%8D%E8%AE%B0%E5%BF%86%E5%8D%A1%E7%89%87.html">
+      <h2>记忆卡片</h2>
+      <p>背诵与翻转记忆卡片，加深词汇印象。</p>
+    </a>
+
+    <a class="card"
+      href="Millionaire%20game/%E9%AD%94%E6%B3%95%E5%A4%A7%E5%AF%8C%E7%BF%81%E7%AD%94%E9%A2%98%E9%97%AF%E5%85%B3%E6%B8%B8%E6%88%8F.html">
+      <h2>魔法大富翁</h2>
+      <p>答题闯关赢取金币，冲击终极大奖。</p>
+    </a>
+
+    <a class="card"
+      href="Tic-tac-toe%EF%BC%88%E4%BA%95%E5%AD%97%E6%A3%8B%EF%BC%89/%E8%8B%B1%E8%AF%AD%E5%8D%95%E8%AF%8D%E4%B9%9D%E5%AE%AB%E6%A0%BC%E6%B8%B8%E6%88%8F.html">
+      <h2>单词井字棋</h2>
+      <p>结合词汇与策略的九宫格对战。</p>
+    </a>
+
+    <a class="card"
+      href="%E5%A5%B3%E5%B7%AB%E7%9A%84%E6%AF%92%E8%8D%AF/%E5%A5%B3%E5%B7%AB%E7%9A%84%E6%AF%92%E8%8D%AF%E5%8D%95%E8%AF%8D%E6%B8%B8%E6%88%8F.html">
+      <h2>女巫的毒药</h2>
+      <p>在女巫的谜题中选择正确单词，安全逃脱。</p>
+    </a>
+
+    <a class="card" href="Lexicon%20Defense/%E8%AF%8D%E6%B1%87%E5%A1%94%E9%98%B2%20Lexicon%20Defense.html">
+      <h2>词汇塔防</h2>
+      <p>错词大军来袭！拼写正确单词才能启动防御炮台。</p>
+    </a>
+  </main>
+
+  <footer>© 2025 英语游戏合辑</footer>
+</body>
+
+</html>

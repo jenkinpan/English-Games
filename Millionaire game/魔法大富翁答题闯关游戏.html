@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魔法大富翁闯关复习游戏</title>
+    <script src="./js/index.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-image: url('./img/111.jpg');
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 15px #6a5af9, 0 0 25px #6a5af9;
+            background: linear-gradient(45deg, #ff6ec4, #7873f5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a8b2d1;
+            margin-bottom: 20px;
+        }
+
+        /* 新增：按钮容器样式 */
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .game-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        /* 棋盘样式 */
+        .board-container {
+            flex: 1;
+            min-width: 600px;
+            background: rgba(16, 18, 47, 0.7);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 0 30px rgba(106, 90, 249, 0.3);
+            border: 1px solid rgba(106, 90, 249, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            aspect-ratio: 7/5;
+            position: relative;
+            border: 2px solid rgba(120, 115, 245, 0.3);
+            border-radius: 10px;
+            background: rgba(12, 14, 43, 0.8);
+            box-shadow: 0 0 40px rgba(106, 90, 249, 0.2);
+        }
+
+        .cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid rgba(106, 90, 249, 0.3);
+            position: relative;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #d6d4f7;
+            background: rgba(16, 18, 47, 0.6);
+            transition: all 0.3s ease;
+        }
+
+        .cell:hover {
+            background: rgba(106, 90, 249, 0.3);
+            box-shadow: 0 0 15px rgba(106, 90, 249, 0.5);
+        }
+
+        .cell.corner {
+            background: rgba(106, 90, 249, 0.2);
+        }
+
+        .cell.start {
+            background: rgba(75, 215, 150, 0.2);
+        }
+
+        .player {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            z-index: 10;
+            transition: all 0.5s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+
+        .player-1 {
+            background: linear-gradient(135deg, #ff6ec4, #ff8e7d);
+        }
+
+        .player-2 {
+            background: linear-gradient(135deg, #6a5af9, #4bcefa);
+        }
+
+        .player-3 {
+            background: linear-gradient(135deg, #42e695, #3bb2b8);
+        }
+
+        .player-4 {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+        }
+
+        /* 控制面板样式 */
+        .control-panel {
+            flex: 0 0 300px;
+            background: rgba(16, 18, 47, 0.7);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 0 0 30px rgba(106, 90, 249, 0.3);
+            border: 1px solid rgba(106, 90, 249, 0.5);
+        }
+
+        .panel-section {
+            background: rgba(12, 14, 43, 0.8);
+            border-radius: 15px;
+            padding: 15px;
+            border: 1px solid rgba(106, 90, 249, 0.3);
+        }
+
+        .panel-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #6a5af9;
+            text-align: center;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(106, 90, 249, 0.3);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #6a5af9, #4bcefa);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin: 5px 0;
+            box-shadow: 0 4px 15px rgba(106, 90, 249, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(106, 90, 249, 0.5);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-reset {
+            background: linear-gradient(45deg, #ff6ec4, #ff8e7d);
+        }
+
+        .btn-import {
+            background: linear-gradient(45deg, #42e695, #3bb2b8);
+        }
+
+        /* 骰子样式 */
+        .dice-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 120px;
+            position: relative;
+        }
+
+        .dice {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #6a5af9, #4bcefa);
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(106, 90, 249, 0.5);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dice:before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg,
+                    rgba(255, 255, 255, 0) 0%,
+                    rgba(255, 255, 255, 0.8) 50%,
+                    rgba(255, 255, 255, 0) 100%);
+            transform: rotate(45deg);
+            animation: shine 3s infinite linear;
+        }
+
+        .dice:hover {
+            transform: scale(1.05);
+        }
+
+        /* 玩家信息 */
+        .player-info {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .player-status {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(30, 33, 57, 0.5);
+        }
+
+        .player-icon {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .player-1-icon {
+            background: linear-gradient(135deg, #ff6ec4, #ff8e7d);
+        }
+
+        .player-2-icon {
+            background: linear-gradient(135deg, #6a5af9, #4bcefa);
+        }
+
+        .player-3-icon {
+            background: linear-gradient(135deg, #42e695, #3bb2b8);
+        }
+
+        .player-4-icon {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+        }
+
+        .current-player {
+            background: rgba(106, 90, 249, 0.3);
+            box-shadow: 0 0 10px rgba(106, 90, 249, 0.5);
+        }
+
+        /* 弹窗样式 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1c3d, #0c0e2b);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 0 50px rgba(106, 90, 249, 0.5);
+            border: 1px solid rgba(106, 90, 249, 0.5);
+            transform: scale(0.8);
+            opacity: 0;
+            transition: all 0.4s ease;
+        }
+
+        .modal.active .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .modal-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #6a5af9;
+        }
+
+        .modal-text {
+            font-size: 1.3rem;
+            margin: 25px 0;
+            color: #d6d4f7;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(12, 14, 43, 0.6);
+            border-radius: 15px;
+            border: 1px solid rgba(106, 90, 249, 0.3);
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .modal-btn {
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            flex: 1;
+            max-width: 180px;
+        }
+
+        .btn-withdraw {
+            background: linear-gradient(45deg, #ff6ec4, #ff8e7d);
+            color: white;
+        }
+
+        .btn-continue {
+            background: linear-gradient(45deg, #42e695, #3bb2b8);
+            color: white;
+        }
+
+        .btn-meaning {
+            background: linear-gradient(45deg, #ffd700, #ff8c00);
+            color: white;
+        }
+
+        /* 动画 */
+        @keyframes glow {
+            0% {
+                text-shadow: 0 0 15px #6a5af9, 0 0 25px #6a5af9;
+            }
+
+            100% {
+                text-shadow: 0 0 25px #ff6ec4, 0 0 35px #ff6ec4;
+            }
+        }
+
+        @keyframes shine {
+            0% {
+                transform: rotate(45deg) translateX(-100%);
+            }
+
+            100% {
+                transform: rotate(45deg) translateX(100%);
+            }
+        }
+
+        @keyframes diceRoll {
+            0% {
+                transform: rotate(0deg) scale(1);
+            }
+
+            25% {
+                transform: rotate(90deg) scale(1.1);
+            }
+
+            50% {
+                transform: rotate(180deg) scale(1.2);
+            }
+
+            75% {
+                transform: rotate(270deg) scale(1.1);
+            }
+
+            100% {
+                transform: rotate(360deg) scale(1);
+            }
+        }
+
+        .rolling {
+            animation: diceRoll 0.5s ease-in-out;
+        }
+
+        /* 魔法效果 */
+        .magic-particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .board:before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: linear-gradient(45deg, #ff6ec4, #6a5af9, #4bcefa, #42e695);
+            z-index: -1;
+            filter: blur(20px);
+            opacity: 0.3;
+            border-radius: 15px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 950px) {
+            .game-container {
+                flex-direction: column;
+            }
+
+            .board-container {
+                min-width: 100%;
+            }
+        }
+
+        /* 新增：游戏说明区样式 */
+        .game-instructions {
+            background: rgba(16, 18, 47, 0.7);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 0 30px rgba(106, 90, 249, 0.3);
+            border: 1px solid rgba(106, 90, 249, 0.5);
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .instructions-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #6a5af9;
+            text-align: center;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(106, 90, 249, 0.3);
+        }
+
+        .instructions-text {
+            font-size: 1rem;
+            color: #d6d4f7;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>魔法大富翁闯关复习游戏</h1>
+            <p class="subtitle">多人PK · 复习闯关 · 趣味答题</p>
+            <!-- 新增：按钮容器 -->
+            <div class="button-container">
+                <button class="btn btn-import" id="importBtn">导入Excel文件</button>
+                <input type="file" id="fileInput" accept=".xlsx, .xls" style="display: none;">
+                <button class="btn btn-reset" id="resetBtn">重置游戏</button>
+            </div>
+        </header>
+
+        <div class="game-container">
+            <div class="board-container">
+                <div class="board" id="gameBoard">
+                    <!-- 棋盘格子将通过JS动态生成 -->
+                </div>
+                <!-- 玩家棋子将通过JS动态生成 -->
+            </div>
+
+            <div class="control-panel">
+                <div class="panel-section">
+                    <h2 class="panel-title">游戏控制</h2>
+                    <button class="btn" id="addPlayerBtn">添加玩家</button>
+                    <button class="btn" id="removePlayerBtn">移除玩家</button>
+                </div>
+
+                <div class="panel-section">
+                    <h2 class="panel-title">掷骰子</h2>
+                    <div class="dice-container">
+                        <div class="dice" id="dice">?</div>
+                    </div>
+                    <p id="diceResult" style="text-align: center; margin-top: 10px; color: #d6d4f7;">点击骰子开始游戏</p>
+                </div>
+
+                <div class="panel-section">
+                    <h2 class="panel-title">玩家信息</h2>
+                    <div class="player-info" id="playerInfo">
+                        <!-- 玩家信息将通过JS动态生成 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 新增：游戏说明区 -->
+        <div class="game-instructions">
+            <h2 class="instructions-title">游戏说明</h2>
+            <p class="instructions-text">1. 导入Excel文件：第一列为题目，第二列为答案，无表头。<br>
+2. 点击“添加玩家”或“移除玩家”控制玩家人数。 <br>
+3. 玩家轮流掷骰子，前进相应步数，当前进到某个格子时，需要回答问题。 <br>
+4. 回答正确，老师点击“继续游戏”按钮，轮到下一位玩家投骰子。<br>
+5. 回答错误，老师点击“答错后退”按钮，玩家回到上一位置。<br>
+6. 当一个玩家到达终点或超出终点位置，则该玩家结束游戏。其他玩家可以继续游戏。</p>
+        </div>
+    </div>
+
+    <!-- 弹窗 -->
+    <div class="modal" id="phraseModal">
+        <div class="modal-content">
+            <h2 class="modal-title">大富翁闯关</h2>
+            <div class="modal-text" id="phraseText">正在加载...</div>
+            <div class="modal-buttons">
+                <button class="modal-btn btn-withdraw" id="withdrawBtn">答错后退</button>
+                <button class="modal-btn btn-continue" id="continueBtn">继续游戏</button>
+                <button class="modal-btn btn-meaning" id="meaningBtn">查看答案</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="winModal">
+        <div class="modal-content">
+            <h2 class="modal-title">游戏结束</h2>
+            <div class="modal-text" id="winText">恭喜玩家到达终点！</div>
+            <div class="modal-buttons">
+                <button class="btn btn-reset" id="winResetBtn" style="margin-top: 20px;">重新开始游戏</button>
+                <button class="btn btn-continue" id="continuePlayingBtn">继续游戏</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 游戏状态
+        const gameState = {
+            currentPlayer: 1, // 当前玩家编号
+            playerPositions: [], // 玩家位置数组
+            phrases: [], // 存储短语的数组
+            meanings: [], // 存储短语中文释义的数组
+            lastPosition: 0, // 记录移动前的位置（用于撤回）
+            gameActive: true,
+            playerCount: 2, // 玩家数量
+            maxPlayers: 4, // 最大玩家数量
+            minPlayers: 1, // 最小玩家数量
+            playersInGame: [] // 记录仍在游戏中的玩家
+        };
+
+        // DOM 元素
+        const elements = {
+            gameBoard: document.getElementById('gameBoard'),
+            dice: document.getElementById('dice'),
+            diceResult: document.getElementById('diceResult'),
+            importBtn: document.getElementById('importBtn'),
+            resetBtn: document.getElementById('resetBtn'),
+            fileInput: document.getElementById('fileInput'),
+            phraseModal: document.getElementById('phraseModal'),
+            phraseText: document.getElementById('phraseText'),
+            withdrawBtn: document.getElementById('withdrawBtn'),
+            continueBtn: document.getElementById('continueBtn'),
+            winModal: document.getElementById('winModal'),
+            winText: document.getElementById('winText'),
+            winResetBtn: document.getElementById('winResetBtn'),
+            playerInfo: document.getElementById('playerInfo'),
+            addPlayerBtn: document.getElementById('addPlayerBtn'),
+            removePlayerBtn: document.getElementById('removePlayerBtn'),
+            meaningBtn: document.getElementById('meaningBtn'),
+            continuePlayingBtn: document.getElementById('continuePlayingBtn')
+        };
+
+        // 初始化游戏
+        function initGame() {
+            createBoard();
+            initPlayers();
+            updatePlayerPositions();
+            updatePlayerUI();
+            gameState.playersInGame = Array.from({ length: gameState.playerCount }, (_, i) => i + 1);
+
+            // 清空默认题目
+            gameState.phrases = [];
+            gameState.meanings = [];
+
+            // 事件监听器
+            elements.dice.addEventListener('click', rollDice);
+            elements.importBtn.addEventListener('click', () => elements.fileInput.click());
+            elements.fileInput.addEventListener('change', handleFileImport);
+            elements.resetBtn.addEventListener('click', resetGame);
+            elements.withdrawBtn.addEventListener('click', handleWithdraw);
+            elements.continueBtn.addEventListener('click', continueGame);
+            elements.winResetBtn.addEventListener('click', resetGame);
+            elements.addPlayerBtn.addEventListener('click', addPlayer);
+            elements.removePlayerBtn.addEventListener('click', removePlayer);
+            elements.meaningBtn.addEventListener('click', showMeaning);
+            elements.continuePlayingBtn.addEventListener('click', continuePlaying);
+        }
+
+        // 创建棋盘
+        function createBoard() {
+            // 清空棋盘
+            elements.gameBoard.innerHTML = '';
+
+            // 定义棋盘布局 (5x7 网格)
+            const gridPositions = [
+                // 顶部行 (0-6)
+                { row: 1, col: 1 }, { row: 1, col: 2 }, { row: 1, col: 3 }, { row: 1, col: 4 }, { row: 1, col: 5 }, { row: 1, col: 6 }, { row: 1, col: 7 },
+
+                // 右侧列 (7-10) - 从上到下
+                { row: 2, col: 7 }, { row: 3, col: 7 }, { row: 4, col: 7 }, { row: 5, col: 7 },
+
+                // 底部行 (11-16) - 从右到左
+                { row: 5, col: 6 }, { row: 5, col: 5 }, { row: 5, col: 4 }, { row: 5, col: 3 }, { row: 5, col: 2 }, { row: 5, col: 1 },
+
+                // 左侧列 (17-19) - 从下到上
+                { row: 4, col: 1 }, { row: 3, col: 1 }, { row: 2, col: 1 }
+            ];
+
+            // 创建格子
+            for (let i = 0; i < 20; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                if (i === 0) {
+                    cell.textContent = '起点';
+                } else if (i === 19) {
+                    cell.textContent = '终点';
+                } else {
+                    cell.textContent = i;
+                }
+
+                // 特殊样式
+                if (i === 0) cell.classList.add('start');
+                if (i === 0 || i === 6 || i === 10 || i === 16) cell.classList.add('corner');
+
+                // 设置网格位置
+                if (gridPositions[i]) {
+                    cell.style.gridRow = gridPositions[i].row;
+                    cell.style.gridColumn = gridPositions[i].col;
+                }
+
+                elements.gameBoard.appendChild(cell);
+            }
+        }
+
+        // 初始化玩家
+        function initPlayers() {
+            gameState.playerPositions = new Array(gameState.playerCount).fill(0);
+            for (let i = 1; i <= gameState.playerCount; i++) {
+                createPlayerElement(i);
+                createPlayerInfoElement(i);
+            }
+        }
+
+        // 创建玩家元素
+        function createPlayerElement(playerNumber) {
+            const player = document.createElement('div');
+            player.className = `player player-${playerNumber}`;
+            player.id = `player${playerNumber}`;
+            player.textContent = playerNumber;
+            elements.gameBoard.appendChild(player);
+        }
+
+        // 创建玩家信息元素
+        function createPlayerInfoElement(playerNumber) {
+            const playerStatus = document.createElement('div');
+            playerStatus.className = 'player-status';
+            playerStatus.id = `player${playerNumber}Status`;
+
+            const playerIcon = document.createElement('div');
+            playerIcon.className = `player-icon player-${playerNumber}-icon`;
+
+            const playerText = document.createElement('div');
+            playerText.innerHTML = `玩家 ${playerNumber}: <span id="player${playerNumber}Pos">位置 0</span>`;
+
+            playerStatus.appendChild(playerIcon);
+            playerStatus.appendChild(playerText);
+            elements.playerInfo.appendChild(playerStatus);
+        }
+
+        // 掷骰子
+        function rollDice() {
+            if (!gameState.gameActive ||!gameState.playersInGame.includes(gameState.currentPlayer)) return;
+
+            // 骰子动画
+            elements.dice.textContent = '?';
+            elements.dice.classList.add('rolling');
+            elements.diceResult.textContent = "掷骰子中...";
+
+            setTimeout(() => {
+                // 生成随机数 (1-6)
+                const roll = Math.floor(Math.random() * 6) + 1;
+                elements.dice.textContent = roll;
+                elements.dice.classList.remove('rolling');
+                elements.diceResult.textContent = `玩家 ${gameState.currentPlayer} 掷出了 ${roll}`;
+
+                // 移动玩家
+                movePlayer(roll);
+            }, 800);
+        }
+
+        // 移动玩家
+        function movePlayer(steps) {
+            const playerIndex = gameState.currentPlayer - 1;
+            gameState.lastPosition = gameState.playerPositions[playerIndex];
+
+            // 计算新位置
+            let newPosition = gameState.playerPositions[playerIndex] + steps;
+
+            // 如果超过棋盘最大位置 (19)
+            if (newPosition > 19) {
+                newPosition = 19;
+            }
+
+            // 一格一格移动
+            const moveOneStep = () => {
+                if (gameState.playerPositions[playerIndex] < newPosition) {
+                    gameState.playerPositions[playerIndex]++;
+                    updatePlayerPositions();
+                    updatePlayerUI();
+                    setTimeout(moveOneStep, 500); // 每500毫秒移动一格
+                } else {
+                    if (newPosition === 19) {
+                        gameState.gameActive = false;
+                        setTimeout(() => {
+                            showWinModal();
+                        }, 800); // 等待移动动画完成后显示胜利弹窗
+                    } else {
+                        // 显示短语弹窗
+                        setTimeout(() => {
+                            showPhrase(newPosition);
+                        }, 800);
+                    }
+                }
+            };
+
+            moveOneStep();
+        }
+
+        // 更新玩家位置（UI）
+        function updatePlayerPositions() {
+            const cells = elements.gameBoard.querySelectorAll('.cell');
+            for (let i = 1; i <= gameState.playerCount; i++) {
+                const pos = gameState.playerPositions[i - 1];
+                const player = document.getElementById(`player${i}`);
+                const cell = cells[pos];
+                if (cell && player) {
+                    const rect = cell.getBoundingClientRect();
+                    const boardRect = elements.gameBoard.getBoundingClientRect();
+                    const top = rect.top - boardRect.top + rect.height / 2 - player.offsetHeight / 2;
+                    const left = rect.left - boardRect.left + rect.width / 2 - player.offsetWidth / 2;
+                    player.style.top = top + 'px';
+                    player.style.left = left + 'px';
+                }
+            }
+        }
+
+        // 更新玩家UI
+        function updatePlayerUI() {
+            for (let i = 1; i <= gameState.playerCount; i++) {
+                const playerPos = document.getElementById(`player${i}Pos`);
+                const playerStatus = document.getElementById(`player${i}Status`);
+                if (playerPos) {
+                    playerPos.textContent = `位置 ${gameState.playerPositions[i - 1]}`;
+                }
+                if (playerStatus) {
+                    if (i === gameState.currentPlayer && gameState.playersInGame.includes(i)) {
+                        playerStatus.classList.add('current-player');
+                    } else {
+                        playerStatus.classList.remove('current-player');
+                    }
+                }
+            }
+        }
+
+        // 显示短语弹窗
+        function showPhrase(position) {
+            // 检查游戏是否结束
+            if (position === 19) {
+                showWinModal();
+                return;
+            }
+
+            // 显示短语
+            const phrase = gameState.phrases[position] || `位置 ${position} 的短语`;
+            elements.phraseText.textContent = phrase;
+            elements.phraseModal.classList.add('active');
+        }
+
+        // 显示中文释义
+        function showMeaning() {
+            const currentPosition = gameState.playerPositions[gameState.currentPlayer - 1];
+            const meaning = gameState.meanings[currentPosition] || '暂无释义';
+            elements.phraseText.textContent += `\n答案: ${meaning}`;
+            // 为了确保换行符生效，将文本内容转换为 HTML 并使用 <br> 标签
+            elements.phraseText.innerHTML = elements.phraseText.textContent.replace(/\n/g, '<br>');
+        }
+
+        // 处理撤回
+        function handleWithdraw() {
+            const playerIndex = gameState.currentPlayer - 1;
+            gameState.playerPositions[playerIndex] = gameState.lastPosition;
+
+            // 更新UI
+            updatePlayerPositions();
+
+            // 切换到下一个玩家
+            nextPlayer();
+            elements.phraseModal.classList.remove('active');
+        }
+
+        // 继续游戏
+        function continueGame() {
+            nextPlayer();
+            elements.phraseModal.classList.remove('active');
+        }
+
+        // 切换到下一个玩家
+        function nextPlayer() {
+            let nextIndex = gameState.playersInGame.indexOf(gameState.currentPlayer) + 1;
+            if (nextIndex >= gameState.playersInGame.length) {
+                nextIndex = 0;
+            }
+            gameState.currentPlayer = gameState.playersInGame[nextIndex];
+            updatePlayerUI();
+        }
+
+        // 导入Excel文件
+        function handleFileImport(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+
+                    // 获取第一个工作表
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+
+                    // 转换为JSON
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                    // 提取短语和释义
+                    gameState.phrases = [];
+                    gameState.meanings = [];
+                    jsonData.forEach(row => {
+                        if (row[0]) {
+                            gameState.phrases.push(row[0]);
+                            gameState.meanings.push(row[1] || '暂无释义');
+                        }
+                    });
+
+                    // 如果导入的短语不足，不进行补充
+                    alert(`成功导入 ${gameState.phrases.length} 条！`);
+                } catch (error) {
+                    alert(`导入文件失败: ${error.message}`);
+                }
+            };
+            reader.onerror = function () {
+                alert('读取文件时发生错误，请重试。');
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // 重置游戏
+        function resetGame() {
+            gameState.currentPlayer = 1;
+            gameState.playerPositions = new Array(gameState.playerCount).fill(0);
+            gameState.lastPosition = 0;
+            gameState.gameActive = true;
+            gameState.playersInGame = Array.from({ length: gameState.playerCount }, (_, i) => i + 1);
+
+            // 更新UI
+            updatePlayerPositions();
+            updatePlayerUI();
+
+            // 关闭弹窗
+            elements.phraseModal.classList.remove('active');
+            elements.winModal.classList.remove('active');
+
+            elements.dice.textContent = '?';
+            elements.diceResult.textContent = "点击骰子开始游戏";
+        }
+
+        // 添加玩家
+        function addPlayer() {
+            if (gameState.playerCount < gameState.maxPlayers) {
+                gameState.playerCount++;
+                gameState.playerPositions.push(0);
+                gameState.playersInGame.push(gameState.playerCount);
+                createPlayerElement(gameState.playerCount);
+                createPlayerInfoElement(gameState.playerCount);
+                updatePlayerPositions();
+                updatePlayerUI();
+            } else {
+                alert('最多支持4名玩家！');
+            }
+        }
+
+        // 移除玩家
+        function removePlayer() {
+            if (gameState.playerCount > gameState.minPlayers) {
+                const lastPlayerNumber = gameState.playerCount;
+                const playerElement = document.getElementById(`player${lastPlayerNumber}`);
+                const playerStatusElement = document.getElementById(`player${lastPlayerNumber}Status`);
+                if (playerElement) {
+                    playerElement.remove();
+                }
+                if (playerStatusElement) {
+                    playerStatusElement.remove();
+                }
+                gameState.playerCount--;
+                gameState.playerPositions.pop();
+                const index = gameState.playersInGame.indexOf(lastPlayerNumber);
+                if (index!== -1) {
+                    gameState.playersInGame.splice(index, 1);
+                }
+                if (gameState.currentPlayer > gameState.playerCount) {
+                    gameState.currentPlayer = 1;
+                }
+                updatePlayerPositions();
+                updatePlayerUI();
+            } else {
+                alert('至少需要1名玩家！');
+            }
+        }
+
+        // 显示获胜弹窗
+        function showWinModal() {
+            elements.winText.textContent = `恭喜玩家 ${gameState.currentPlayer} 到达终点！`;
+            elements.winModal.classList.add('active');
+        }
+
+        // 继续游戏（获胜玩家退出）
+        function continuePlaying() {
+            const winnerIndex = gameState.playersInGame.indexOf(gameState.currentPlayer);
+            if (winnerIndex!== -1) {
+                gameState.playersInGame.splice(winnerIndex, 1);
+            }
+
+            if (gameState.playersInGame.length === 0) {
+                alert('没有玩家继续游戏，游戏结束！');
+                resetGame();
+            } else {
+                gameState.gameActive = true;
+                gameState.currentPlayer = gameState.playersInGame[0];
+                updatePlayerUI();
+                elements.winModal.classList.remove('active');
+            }
+        }
+
+        // 初始化游戏
+        window.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+
+</html>

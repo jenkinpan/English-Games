@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script>
+        window.__DATA__ = { "isInputHidden": false, "words": [] }
+    </script>
+
+    <script>
+        function sendHeightMessage() {
+            // 检查是否在iframe中
+            // 检查是否在iframe中
+            if (window.parent !== window) {
+                // 获取滚动高度
+                const mt = parseInt(document.documentElement.style.marginTop) || 0;
+                const mb = parseInt(document.documentElement.style.marginBottom) || 0;
+                const marginAll = mt + mb;
+                // 向父页面发送消息
+                window.parent.postMessage({
+                    type: 'iframe-resize',
+                    height: document.documentElement.scrollHeight + marginAll,
+                    marginAll: marginAll,
+                    url: window.location.href
+                }, '*');
+            } else {
+                console.log('页面不在iframe中，无法发送消息');
+            }
+        }
+        // 页面加载完成后立即发送一次消息
+        window.addEventListener('load', function (event) {
+            console.log('load');
+            // 立即发送一次
+            sendHeightMessage();
+            // 创建MutationObserver监控DOM变化
+            const domMo = new ResizeObserver(() => {
+                // 延迟发送，避免频繁触发
+                console.log('MutationObserver');
+                setTimeout(sendHeightMessage, 100);
+            });
+
+            // 开始监控body元素的修改
+            domMo.observe(document.body);
+        });
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英语单词记忆卡片</title>
+    <!-- 引入SDK -->
+    <script src="https://otf-pub-cdn.ourteacher.cc/sdk/html.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            padding: 30px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-top: 0;
+            font-size: 32px;
+            background: linear-gradient(90deg, #2575fc, #6a11cb);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .timer-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+
+        .timer {
+            font-size: 36px;
+            font-weight: bold;
+            background: linear-gradient(90deg, #ff416c, #ff4b2b);
+            color: white;
+            padding: 10px 30px;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(255, 75, 43, 0.3);
+        }
+
+        .btn {
+            background: linear-gradient(90deg, #00b09b, #96c93d);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 176, 155, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 176, 155, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn.reset {
+            background: linear-gradient(90deg, #ff416c, #ff4b2b);
+            box-shadow: 0 5px 15px rgba(255, 75, 43, 0.3);
+        }
+
+        .toggle-btn {
+            background: linear-gradient(90deg, #ffa62e, #ff3c38);
+            box-shadow: 0 5px 15px rgba(255, 75, 43, 0.3);
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .card {
+            height: 180px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front,
+        .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .card-front {
+            background: linear-gradient(135deg, #43cea2, #185a9d);
+            color: white;
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+            color: white;
+            transform: rotateY(180deg);
+        }
+
+        .number {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .word {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .input-section {
+            background-color: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+            transition: max-height 0.5s ease, padding 0.5s ease, margin 0.5s ease;
+            max-height: 500px;
+            overflow: hidden;
+        }
+
+        .input-section.hidden {
+            max-height: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            margin-top: 10px;
+        }
+
+        h2 {
+            color: #2c3e50;
+            margin-top: 0;
+            text-align: center;
+        }
+
+        .word-inputs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        input {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .instructions {
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin-top: 25px;
+            font-size: 15px;
+        }
+
+        .instructions h3 {
+            margin-top: 0;
+            color: #0d47a1;
+        }
+
+        .instructions ol {
+            padding-left: 20px;
+            margin-bottom: 0;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 768px) {
+
+            .cards-grid,
+            .word-inputs {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+
+            .cards-grid,
+            .word-inputs {
+                grid-template-columns: 1fr;
+            }
+
+            .timer {
+                font-size: 28px;
+                padding: 8px 20px;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 16px;
+            }
+        }
+    </style>
+    <meta data-bot-id="100295" data-ai-app-id="277" data-message-id="f9ffbe68-51a2-4d2c-847b-8d358c72b649" />
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>英语单词记忆卡片</h1>
+        </header>
+
+        <div class="timer-container">
+            <div class="timer" id="timer">01:00</div>
+            <button class="btn" id="startBtn">开始记忆</button>
+            <button class="btn reset" id="resetBtn">重置</button>
+            <button class="btn toggle-btn" id="toggleInputBtn">隐藏输入</button>
+        </div>
+
+        <div class="cards-grid" id="cardsContainer">
+            <!-- Cards will be generated here -->
+        </div>
+
+        <div class="input-section" id="inputSection">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 style="margin: 0;">教师单词输入</h2>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn" id="addWordBtn"
+                        style="padding: 8px 20px; font-size: 16px; background: linear-gradient(90deg, #4facfe, #00f2fe);">+
+                        增加单词</button>
+                    <button class="btn" id="removeWordBtn"
+                        style="padding: 8px 20px; font-size: 16px; background: linear-gradient(90deg, #fa709a, #fee140);">-
+                        删除单词</button>
+                </div>
+            </div>
+            <div class="word-inputs" id="wordInputs">
+                <!-- Word inputs will be generated here -->
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>使用说明</h3>
+            <ol>
+                <li>在下方输入框中输入英语单词（每个数字对应一个单词），可以点击"增加单词"或"删除单词"按钮调整数量</li>
+                <li>点击"开始记忆"按钮开始1分钟倒计时</li>
+                <li>学生需要在1分钟内记住所有单词</li>
+                <li>倒计时结束后，所有卡片将自动翻面，只显示数字</li>
+                <li>点击卡片可以查看单词（教师可控制显示）</li>
+                <li>点击"重置"按钮可重新开始练习</li>
+                <li>点击"隐藏输入"按钮可以隐藏或显示教师单词输入部分</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const cardsContainer = document.getElementById('cardsContainer');
+            const wordInputsContainer = document.getElementById('wordInputs');
+            const startBtn = document.getElementById('startBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const timerDisplay = document.getElementById('timer');
+            const inputSection = document.getElementById('inputSection');
+            const toggleInputBtn = document.getElementById('toggleInputBtn');
+
+            let timer;
+            let timeLeft = 60;
+            let isInputHidden = false; // Default state
+            let wordCount = 9; // Current number of words, default is 9
+
+            // 创建音频上下文
+            let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+            // 确保音频上下文被激活（某些浏览器需要用户交互）
+            function ensureAudioContext() {
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+            }
+
+            // 播放音效的函数
+            function playSound(frequency, duration, type = 'sine') {
+                ensureAudioContext();
+
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.value = frequency;
+                oscillator.type = type;
+
+                // 设置音量包络（淡入淡出）
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + duration);
+            }
+
+            // 倒计时音效（较高频率，短促）
+            function playCountdownSound() {
+                playSound(800, 0.2, 'sine');
+            }
+
+            // 翻页音效（中奖音效 - 上升音调序列）
+            function playFlipSound() {
+                ensureAudioContext();
+
+                // 中奖音效：上升的音调序列，类似 do-re-mi-fa-sol
+                const frequencies = [523.25, 659.25, 783.99, 880.00, 1046.50]; // C5, E5, G5, A5, C6
+                const baseTime = audioContext.currentTime;
+
+                // 播放上升的音调序列
+                frequencies.forEach((freq, index) => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.value = freq;
+                    oscillator.type = 'sine';
+
+                    const startTime = baseTime + index * 0.08;
+                    const duration = 0.15;
+
+                    // 音量包络：快速淡入，然后淡出
+                    gainNode.gain.setValueAtTime(0, startTime);
+                    gainNode.gain.linearRampToValueAtTime(0.25, startTime + 0.02);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+
+                    oscillator.start(startTime);
+                    oscillator.stop(startTime + duration);
+                });
+
+                // 添加一个低音和声，增强中奖感
+                const bassOscillator = audioContext.createOscillator();
+                const bassGain = audioContext.createGain();
+
+                bassOscillator.connect(bassGain);
+                bassGain.connect(audioContext.destination);
+
+                bassOscillator.frequency.value = 261.63; // C4
+                bassOscillator.type = 'triangle'; // 三角形波更柔和
+
+                const bassStartTime = baseTime;
+                const bassDuration = 0.4;
+
+                bassGain.gain.setValueAtTime(0, bassStartTime);
+                bassGain.gain.linearRampToValueAtTime(0.15, bassStartTime + 0.05);
+                bassGain.gain.exponentialRampToValueAtTime(0.01, bassStartTime + bassDuration);
+
+                bassOscillator.start(bassStartTime);
+                bassOscillator.stop(bassStartTime + bassDuration);
+            }
+
+            // --- Save data to localStorage ---
+            function saveToLocalStorage() {
+                const words = [];
+                for (let i = 1; i <= wordCount; i++) {
+                    const input = document.getElementById(`word-${i}`);
+                    if (input) {
+                        words.push(input.value);
+                    }
+                }
+                const dataToSave = {
+                    words: words,
+                    wordCount: wordCount,
+                    isInputHidden: isInputHidden
+                };
+                try {
+                    localStorage.setItem('wordMemoryCards', JSON.stringify(dataToSave));
+                } catch (err) {
+                    console.error("Failed to save to localStorage:", err);
+                }
+            }
+
+            // --- Load data from localStorage ---
+            function loadFromLocalStorage() {
+                try {
+                    const savedData = localStorage.getItem('wordMemoryCards');
+                    if (savedData) {
+                        return JSON.parse(savedData);
+                    }
+                } catch (err) {
+                    console.error("Failed to load from localStorage:", err);
+                }
+                return null;
+            }
+
+            // --- SDK Integration: Function to save data ---
+            function saveData() {
+                const words = [];
+                for (let i = 1; i <= wordCount; i++) {
+                    const input = document.getElementById(`word-${i}`);
+                    if (input) {
+                        words.push(input.value);
+                    }
+                }
+                const dataToSave = {
+                    words: words,
+                    wordCount: wordCount,
+                    isInputHidden: isInputHidden
+                };
+                // Save to localStorage
+                saveToLocalStorage();
+                // Also save via SDK if available
+                if (window.ot && typeof ot.saveData === 'function') {
+                    ot.saveData(dataToSave).catch(err => console.error("Failed to save data:", err));
+                }
+            }
+
+            // --- Function to create a word input and card ---
+            function createWordInputAndCard(index) {
+                const i = index + 1;
+
+                // Create word input
+                const inputGroup = document.createElement('div');
+                inputGroup.className = 'input-group';
+
+                const label = document.createElement('label');
+                label.textContent = `单词 ${i}:`;
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = `word-${i}`;
+                input.placeholder = `输入单词 ${i}`;
+
+                inputGroup.appendChild(label);
+                inputGroup.appendChild(input);
+                wordInputsContainer.appendChild(inputGroup);
+
+                // Create card
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.dataset.number = i;
+
+                const cardInner = document.createElement('div');
+                cardInner.className = 'card-inner';
+
+                const cardFront = document.createElement('div');
+                cardFront.className = 'card-front';
+
+                const numberFront = document.createElement('div');
+                numberFront.className = 'number';
+                numberFront.textContent = i;
+
+                const wordDisplay = document.createElement('div');
+                wordDisplay.className = 'word';
+                wordDisplay.id = `display-word-${i}`;
+                wordDisplay.textContent = '';
+
+                cardFront.appendChild(numberFront);
+                cardFront.appendChild(wordDisplay);
+
+                const cardBack = document.createElement('div');
+                cardBack.className = 'card-back';
+
+                const numberBack = document.createElement('div');
+                numberBack.className = 'number';
+                numberBack.textContent = i;
+
+                cardBack.appendChild(numberBack);
+
+                cardInner.appendChild(cardFront);
+                cardInner.appendChild(cardBack);
+                card.appendChild(cardInner);
+                cardsContainer.appendChild(card);
+
+                // Add click event to card
+                card.addEventListener('click', function () {
+                    this.classList.toggle('flipped');
+                    // 播放翻页音效
+                    playFlipSound();
+                });
+
+                // Add input event to update card display AND SAVE DATA
+                input.addEventListener('input', function () {
+                    const word = this.value.trim();
+                    const displayElement = document.getElementById(`display-word-${i}`);
+                    if (displayElement) {
+                        displayElement.textContent = word;
+                    }
+                    saveData(); // Call save on every input change
+                });
+            }
+
+            // --- Function to remove a word input and card ---
+            function removeWordInputAndCard() {
+                if (wordCount <= 1) {
+                    alert('至少需要保留1个单词！');
+                    return;
+                }
+
+                const i = wordCount;
+
+                // Remove input
+                const input = document.getElementById(`word-${i}`);
+                if (input) {
+                    input.closest('.input-group').remove();
+                }
+
+                // Remove card
+                const card = document.querySelector(`.card[data-number="${i}"]`);
+                if (card) {
+                    card.remove();
+                }
+
+                wordCount--;
+                saveData();
+            }
+
+            // --- Function to renumber all cards and inputs ---
+            function renumberAllCardsAndInputs() {
+                // Renumber inputs
+                const inputGroups = wordInputsContainer.querySelectorAll('.input-group');
+                inputGroups.forEach((group, index) => {
+                    const i = index + 1;
+                    const label = group.querySelector('label');
+                    const input = group.querySelector('input');
+                    if (label) label.textContent = `单词 ${i}:`;
+                    if (input) {
+                        input.id = `word-${i}`;
+                        input.placeholder = `输入单词 ${i}`;
+                    }
+                });
+
+                // Renumber cards
+                const cards = cardsContainer.querySelectorAll('.card');
+                cards.forEach((card, index) => {
+                    const i = index + 1;
+                    card.dataset.number = i;
+                    const numberFront = card.querySelector('.card-front .number');
+                    const numberBack = card.querySelector('.card-back .number');
+                    const wordDisplay = card.querySelector('.word');
+                    if (numberFront) numberFront.textContent = i;
+                    if (numberBack) numberBack.textContent = i;
+                    if (wordDisplay) {
+                        wordDisplay.id = `display-word-${i}`;
+                        // Update the input event listener to match the new ID
+                        const input = document.getElementById(`word-${i}`);
+                        if (input) {
+                            // Remove old event listener and add new one
+                            const newInput = input.cloneNode(true);
+                            input.parentNode.replaceChild(newInput, input);
+                            newInput.addEventListener('input', function () {
+                                const word = this.value.trim();
+                                const displayElement = document.getElementById(`display-word-${i}`);
+                                if (displayElement) {
+                                    displayElement.textContent = word;
+                                }
+                                saveData();
+                            });
+                        }
+                    }
+                });
+            }
+
+            // --- Function to add a word input and card ---
+            function addWordInputAndCard() {
+                wordCount++;
+                createWordInputAndCard(wordCount - 1);
+                saveData();
+            }
+
+            // Function to shuffle array using Fisher-Yates algorithm
+            function shuffleArray(array) {
+                const shuffled = [...array];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+                return shuffled;
+            }
+
+            // Function to randomly reassign words to cards
+            function randomizeCardWords() {
+                // Collect all words from inputs
+                const words = [];
+                for (let i = 1; i <= wordCount; i++) {
+                    const input = document.getElementById(`word-${i}`);
+                    if (input) {
+                        words.push(input.value.trim());
+                    }
+                }
+
+                // Filter out empty words
+                const validWords = words.filter(word => word.length > 0);
+
+                // If no valid words, return
+                if (validWords.length === 0) {
+                    return;
+                }
+
+                // Shuffle the words
+                const shuffledWords = shuffleArray(validWords);
+
+                // Reassign shuffled words to cards
+                // If we have fewer words than cards, pad with empty strings
+                // If we have more words than cards, use only the first wordCount words
+                for (let i = 1; i <= wordCount; i++) {
+                    const displayElement = document.getElementById(`display-word-${i}`);
+                    if (displayElement) {
+                        // Use shuffled word if available, otherwise use empty string
+                        const wordToDisplay = i <= shuffledWords.length ? shuffledWords[i - 1] : '';
+                        displayElement.textContent = wordToDisplay;
+                    }
+                }
+            }
+
+            // --- SDK Integration: Function to initialize UI from data ---
+            function initializeUI(data) {
+                // Determine word count from saved data or use default
+                if (data && data.wordCount && data.wordCount > 0) {
+                    wordCount = data.wordCount;
+                } else if (data && data.words && data.words.length > 0) {
+                    wordCount = data.words.length;
+                } else {
+                    wordCount = 9; // Default
+                }
+
+                // Clear existing cards and inputs
+                cardsContainer.innerHTML = '';
+                wordInputsContainer.innerHTML = '';
+
+                // Create cards and inputs based on wordCount
+                for (let i = 0; i < wordCount; i++) {
+                    createWordInputAndCard(i);
+                }
+
+                // Fill in saved words if they exist
+                if (data && data.words && data.words.length > 0) {
+                    data.words.forEach((word, index) => {
+                        const i = index + 1;
+                        const input = document.getElementById(`word-${i}`);
+                        const display = document.getElementById(`display-word-${i}`);
+                        if (input && display) {
+                            input.value = word;
+                            display.textContent = word;
+                        }
+                    });
+                }
+
+                // Use saved toggle state, or fallback to default (false)
+                isInputHidden = (data && typeof data.isInputHidden === 'boolean') ? data.isInputHidden : false;
+                updateInputSectionVisibility();
+
+                // Randomly assign words to cards after initialization
+                randomizeCardWords();
+            }
+
+            // Helper to update visibility based on isInputHidden state
+            function updateInputSectionVisibility() {
+                if (isInputHidden) {
+                    inputSection.classList.add('hidden');
+                    toggleInputBtn.textContent = '显示输入';
+                } else {
+                    inputSection.classList.remove('hidden');
+                    toggleInputBtn.textContent = '隐藏输入';
+                }
+            }
+
+            // Add/Remove word buttons
+            const addWordBtn = document.getElementById('addWordBtn');
+            const removeWordBtn = document.getElementById('removeWordBtn');
+
+            addWordBtn.addEventListener('click', function () {
+                addWordInputAndCard();
+            });
+
+            removeWordBtn.addEventListener('click', function () {
+                removeWordInputAndCard();
+            });
+
+            // Start button event
+            startBtn.addEventListener('click', function () {
+                startTimer();
+                startBtn.disabled = true;
+            });
+
+            // Reset button event
+            resetBtn.addEventListener('click', function () {
+                resetTimer();
+                document.querySelectorAll('.card').forEach(card => card.classList.remove('flipped'));
+                randomizeCardWords(); // Randomly reassign words to cards
+                startBtn.disabled = false;
+            });
+
+            // Toggle input visibility and SAVE state
+            toggleInputBtn.addEventListener('click', function () {
+                isInputHidden = !isInputHidden;
+                updateInputSectionVisibility();
+                saveData(); // Save the new visibility state
+            });
+
+            // Timer functions
+            function startTimer() {
+                clearInterval(timer);
+                timeLeft = 60;
+                updateTimerDisplay();
+
+                timer = setInterval(function () {
+                    timeLeft--;
+                    updateTimerDisplay();
+
+                    // 倒计时剩余10秒时，每秒播放音效
+                    if (timeLeft <= 10 && timeLeft > 0) {
+                        playCountdownSound();
+                    }
+
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        document.querySelectorAll('.card').forEach(card => card.classList.add('flipped'));
+                    }
+                }, 1000);
+            }
+
+            function resetTimer() {
+                clearInterval(timer);
+                timeLeft = 60;
+                updateTimerDisplay();
+                startBtn.disabled = false;
+            }
+
+            function updateTimerDisplay() {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+                if (timeLeft <= 10) {
+                    timerDisplay.style.background = 'linear-gradient(90deg, #ff416c, #ff4b2b)';
+                } else {
+                    timerDisplay.style.background = 'linear-gradient(90deg, #00b09b, #96c93d)';
+                }
+            }
+
+            // --- Load data on page start ---
+            // Try to load from SDK first, then fallback to localStorage, then default
+            if (window.ot && typeof ot.getData === 'function') {
+                ot.getData().then(data => {
+                    console.log("Data loaded from server:", data);
+                    if (data && data.words && data.words.length > 0) {
+                        // Use SDK data if available
+                        initializeUI(data);
+                        // Also save to localStorage for backup
+                        saveToLocalStorage();
+                    } else {
+                        // SDK data not available, try localStorage
+                        const localData = loadFromLocalStorage();
+                        if (localData && localData.words && localData.words.length > 0) {
+                            console.log("Data loaded from localStorage:", localData);
+                            initializeUI(localData);
+                        } else {
+                            initializeUI(null);
+                        }
+                    }
+                }).catch(err => {
+                    console.error("Failed to load data from SDK:", err);
+                    // Fallback to localStorage
+                    const localData = loadFromLocalStorage();
+                    if (localData && localData.words && localData.words.length > 0) {
+                        console.log("Data loaded from localStorage:", localData);
+                        initializeUI(localData);
+                    } else {
+                        initializeUI(null);
+                    }
+                });
+            } else {
+                // SDK not available, use localStorage
+                const localData = loadFromLocalStorage();
+                if (localData && localData.words && localData.words.length > 0) {
+                    console.log("Data loaded from localStorage:", localData);
+                    initializeUI(localData);
+                } else {
+                    console.log("No saved data found, using default values.");
+                    initializeUI(null);
+                }
+            }
+        });
+    </script>
+
+
+</body>
+
+</html>
