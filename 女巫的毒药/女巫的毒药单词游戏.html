@@ -1,605 +1,84 @@
 <!doctype html>
 <html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>女巫的毒药 - 英语课堂游戏</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>女巫的毒药 - 英语课堂游戏</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    }
+  <body>
+    <div class="container">
+      <header>
+        <h1>
+          <i class="fas fa-hat-wizard"></i> 女巫的毒药
+          <i class="fas fa-flask-poison"></i>
+        </h1>
+      </header>
 
-    body {
-      background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
-      color: #fff;
-      min-height: 100vh;
-      padding: 20px;
-    }
+      <div class="game-container">
+        <div class="control-panel">
+          <h2 class="panel-title"><i class="fas fa-cogs"></i> 游戏设置</h2>
 
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-    }
+          <div class="input-area">
+            <input
+              type="file"
+              id="fileInput"
+              accept=".xlsx,.txt"
+              style="margin-bottom: 10px; width: 100%; color: #ccc"
+            />
+            <textarea
+              id="wordInput"
+              spellcheck="false"
+              placeholder="在此输入单词，每行一个。&#10;或者点击上方按钮导入文件。&#10;系统会自动根据单词数量调整卡片大小。"
+            ></textarea>
 
-    header {
-      text-align: center;
-      margin-bottom: 30px;
-      padding: 20px;
-      background: rgba(0, 0, 0, 0.4);
-      border-radius: 15px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-      border: 2px solid #ff6b6b;
-    }
+            <button id="importBtn" class="btn">
+              <i class="fas fa-magic"></i> 生成/导入单词卡
+            </button>
 
-    h1 {
-      font-size: 3rem;
-      margin-bottom: 10px;
-      color: #ff9e6b;
-      text-shadow: 0 0 10px rgba(255, 158, 107, 0.7);
-    }
+            <button
+              id="restartBtn"
+              class="btn btn-restart btn-disabled"
+              disabled
+            >
+              <i class="fas fa-redo-alt"></i> 重新开始 (换毒药)
+            </button>
+          </div>
 
-    .subtitle {
-      font-size: 1.2rem;
-      opacity: 0.9;
-    }
-
-    .game-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 30px;
-      justify-content: center;
-    }
-
-    .control-panel,
-    .word-grid-container {
-      background: rgba(20, 30, 48, 0.85);
-      border-radius: 15px;
-      padding: 25px;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
-      border: 2px solid #4ecdc4;
-    }
-
-    .control-panel {
-      flex: 1;
-      min-width: 300px;
-    }
-
-    .word-grid-container {
-      flex: 2;
-      min-width: 600px;
-    }
-
-    .panel-title {
-      font-size: 1.8rem;
-      margin-bottom: 20px;
-      color: #4ecdc4;
-      text-align: center;
-      padding-bottom: 10px;
-      border-bottom: 2px solid #ff6b6b;
-    }
-
-    .input-area {
-      margin-bottom: 25px;
-    }
-
-    textarea {
-      width: 100%;
-      height: 120px;
-      padding: 15px;
-      border-radius: 10px;
-      background: rgba(10, 15, 30, 0.7);
-      border: 2px solid #ff9e6b;
-      color: white;
-      font-size: 1.1rem;
-      resize: none;
-      margin-bottom: 15px;
-    }
-
-    textarea::placeholder {
-      color: #aaa;
-    }
-
-    .btn {
-      background: linear-gradient(to right, #ff6b6b, #ff9e6b);
-      color: white;
-      border: none;
-      padding: 12px 25px;
-      font-size: 1.1rem;
-      border-radius: 50px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-weight: bold;
-      display: block;
-      width: 100%;
-      margin: 10px 0;
-      box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
-    }
-
-    .btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(255, 107, 107, 0.6);
-    }
-
-    .btn:active {
-      transform: translateY(1px);
-    }
-
-    .btn-restart {
-      background: linear-gradient(to right, #4ecdc4, #6fffe9);
-      color: #0a0f1e;
-      box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4);
-    }
-
-    .btn-restart:hover {
-      box-shadow: 0 8px 20px rgba(78, 205, 196, 0.6);
-    }
-
-    .btn-disabled {
-      background: #555;
-      cursor: not-allowed;
-      opacity: 0.7;
-    }
-
-    .btn-disabled:hover {
-      transform: none;
-      box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
-    }
-
-    .instructions {
-      background: rgba(10, 15, 30, 0.7);
-      padding: 20px;
-      border-radius: 10px;
-      margin-top: 20px;
-      font-size: 1rem;
-      line-height: 1.6;
-      border-left: 4px solid #ff6b6b;
-    }
-
-    .instructions h3 {
-      color: #ff9e6b;
-      margin-bottom: 10px;
-    }
-
-    .instructions ul {
-      padding-left: 20px;
-    }
-
-    .instructions li {
-      margin-bottom: 8px;
-    }
-
-    .word-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-      gap: 12px;
-      margin: 0 auto;
-      width: 100%;
-    }
-
-    .word-cell {
-      background: linear-gradient(135deg, #3a506b, #1c2541);
-      border-radius: 10px;
-      min-height: 80px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      font-weight: bold;
-      text-align: center;
-      padding: 10px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-      border: 2px solid #4ecdc4;
-      user-select: none;
-      word-wrap: break-word;
-      word-break: break-all;
-    }
-
-    .word-cell:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
-      background: linear-gradient(135deg, #4a618b, #2a3a5e);
-    }
-
-    .word-cell.selected-poison {
-      background: linear-gradient(135deg, #ff6b6b, #c44545);
-      border-color: #ff9e6b;
-      box-shadow: 0 0 15px rgba(255, 107, 107, 0.7);
-    }
-
-    .word-cell.poisoned {
-      background: linear-gradient(135deg, #8b0000, #4a0000);
-      border-color: #ff0000;
-      animation: poisonEffect 0.8s ease;
-    }
-
-    @keyframes poisonEffect {
-      0% {
-        transform: scale(1);
-      }
-
-      50% {
-        transform: scale(1.2);
-        box-shadow: 0 0 30px rgba(255, 0, 0, 0.8);
-      }
-
-      100% {
-        transform: scale(1);
-      }
-    }
-
-    .game-status {
-      text-align: center;
-      font-size: 1.8rem;
-      margin: 25px 0;
-      min-height: 60px;
-      padding: 15px;
-      border-radius: 10px;
-      background: rgba(10, 15, 30, 0.7);
-      border: 2px solid #ff9e6b;
-    }
-
-    .notification {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(178, 31, 31, 0.95);
-      color: white;
-      padding: 30px 50px;
-      border-radius: 15px;
-      font-size: 2.5rem;
-      font-weight: bold;
-      text-align: center;
-      box-shadow: 0 0 30px rgba(255, 0, 0, 0.7);
-      z-index: 1000;
-      display: none;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0% {
-        transform: translate(-50%, -50%) scale(1);
-      }
-
-      50% {
-        transform: translate(-50%, -50%) scale(1.1);
-      }
-
-      100% {
-        transform: translate(-50%, -50%) scale(1);
-      }
-    }
-
-    .example-table {
-      width: 100%;
-      margin-top: 15px;
-      border-collapse: collapse;
-      background: rgba(10, 15, 30, 0.7);
-      border-radius: 10px;
-    }
-
-    .example-table th,
-    .example-table td {
-      border: 1px solid #4ecdc4;
-      padding: 8px;
-      text-align: center;
-    }
-
-    .example-table th {
-      background: rgba(78, 205, 196, 0.2);
-    }
-
-    @media (max-width: 768px) {
-      .game-container {
-        flex-direction: column;
-      }
-
-      .word-grid {
-        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-        gap: 8px;
-      }
-
-      .word-cell {
-        min-height: 60px;
-        font-size: 1rem;
-      }
-    }
-  </style>
-</head>
-
-<body>
-  <div class="container">
-    <header>
-      <h1>
-        <i class="fas fa-hat-wizard"></i> 女巫的毒药
-        <i class="fas fa-flask-poison"></i>
-      </h1>
-    </header>
-
-    <div class="game-container">
-      <div class="control-panel">
-        <h2 class="panel-title"><i class="fas fa-cogs"></i> 导入txt文件</h2>
-
-        <div class="input-area">
-          <input type="file" id="fileInput" accept=".xlsx,.txt" />
-          <textarea id="wordInput"
-            placeholder="请一行输入一个单词，数量不限但至少 1 个&#10;例如：&#10;apple&#10;banana&#10;cherry&#10;date&#10;elderberry"></textarea>
-          <button id="importBtn" class="btn">
-            <i class="fas fa-file-import"></i> 导入单词
-          </button>
-          <button id="restartBtn" class="btn btn-restart btn-disabled" disabled>
-            <i class="fas fa-redo-alt"></i> 重新开始游戏
-          </button>
+          <div class="instructions">
+            <h3><i class="fas fa-book-open"></i> 玩法指南：</h3>
+            <ul>
+              <li>1. 输入单词或导入 Excel/TXT 文件</li>
+              <li>2. <strong>第一组</strong>点击一个单词作为“毒药”(保密)</li>
+              <li>3. <strong>第二组</strong>点击另一个单词作为“毒药”(保密)</li>
+              <li>4. 全班轮流读单词并点击，点到红色毒药者淘汰！</li>
+              <li>5. 点击“重新开始”可保留单词表，仅重置毒药位置</li>
+            </ul>
+          </div>
         </div>
 
-        <div class="instructions">
-          <h3><i class="fas fa-info-circle"></i> 游戏说明：</h3>
-          <ul>
-            <li>1. 支持 TXT/Excel 导入，也可直接输入任意数量单词</li>
-            <li>2. 导入单词后，让两组学生分别选择一个单词作为毒药</li>
-            <li>3. 两组学生轮流点击并念出单词，直到有人踩到毒药</li>
-            <li>4. 若想沿用同一单词表，可用“重新开始”重新设置毒药</li>
-          </ul>
+        <div class="word-grid-container">
+          <h2 class="panel-title"><i class="fas fa-th"></i> 单词魔法阵</h2>
+
+          <div class="game-status" id="gameStatus">请先导入单词...</div>
+
+          <div class="word-grid" id="wordGrid"></div>
         </div>
       </div>
 
-      <div class="word-grid-container">
-        <h2 class="panel-title"><i class="fas fa-th"></i> 单词网格</h2>
-
-        <div class="game-status" id="gameStatus">请导入单词表开始游戏</div>
-
-        <div class="word-grid" id="wordGrid">
-          <!-- 单词网格将由JavaScript生成 -->
-        </div>
+      <div class="notification" id="notification">
+        <i class="fas fa-skull-crossbones"></i><br />
+        啊！有毒！
       </div>
     </div>
 
-    <div class="notification" id="notification">啊，有毒！</div>
-  </div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      // 获取DOM元素
-      const wordInput = document.getElementById("wordInput");
-      const importBtn = document.getElementById("importBtn");
-      const restartBtn = document.getElementById("restartBtn");
-      const wordGrid = document.getElementById("wordGrid");
-      const gameStatus = document.getElementById("gameStatus");
-      const notification = document.getElementById("notification");
-      const fileInput = document.getElementById("fileInput");
-
-      // 游戏状态变量
-      let words = [];
-      let gameState = "setup"; // setup, poisonSelect, team1Poison, team2Poison, playing, gameOver
-      let team1PoisonWord = null;
-      let team2PoisonWord = null;
-      let selectedPoisonCells = [];
-
-      // 导入单词
-      importBtn.addEventListener("click", importWords);
-
-      // 重新开始游戏
-      restartBtn.addEventListener("click", restartGame);
-
-      // 文件选择事件
-      fileInput.addEventListener("change", handleFileSelect);
-
-      // 处理文件选择
-      function handleFileSelect(event) {
-        const file = event.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          if (
-            file.type ===
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-          ) {
-            reader.onload = function (e) {
-              const data = new Uint8Array(e.target.result);
-              const workbook = XLSX.read(data, { type: "array" });
-              const firstSheetName = workbook.SheetNames[0];
-              const worksheet = workbook.Sheets[firstSheetName];
-              const range = XLSX.utils.decode_range(worksheet["!ref"]);
-              const rows = range.e.r + 1;
-              const cols = range.e.c + 1;
-
-              words = [];
-              for (let r = 0; r < rows; r++) {
-                for (let c = 0; c < cols; c++) {
-                  const cellAddress = XLSX.utils.encode_cell({ r, c });
-                  const cell = worksheet[cellAddress];
-                  if (cell && cell.v.toString().trim()) {
-                    words.push(cell.v.toString().trim());
-                  }
-                }
-              }
-
-              if (!words.length) {
-                alert("Excel 表格里需要至少 1 个单词");
-                return;
-              }
-
-              renderWordGrid();
-              startPoisonSelection();
-              gameStatus.textContent =
-                "请第一位同学选择毒药，第二位同学闭眼";
-            };
-            reader.readAsArrayBuffer(file);
-          } else if (file.type === "text/plain") {
-            reader.onload = function (e) {
-              const text = e.target.result;
-              const lines = text
-                .split("\n")
-                .map((line) => line.trim())
-                .filter((line) => line !== "");
-
-              if (!lines.length) {
-                alert("TXT 文件里需要至少 1 个单词");
-                return;
-              }
-
-              words = [...lines];
-
-              renderWordGrid();
-              startPoisonSelection();
-              gameStatus.textContent =
-                "请第一位同学选择毒药，第二位同学闭眼";
-            };
-            reader.readAsText(file);
-          }
-        }
-      }
-
-      // 导入单词函数
-      function importWords() {
-        const input = wordInput.value.trim();
-        if (!input) {
-          alert("请输入单词数据");
-          return;
-        }
-
-        const lines = input
-          .split("\n")
-          .map((line) => line.trim())
-          .filter((line) => line !== "");
-
-        if (!lines.length) {
-          alert("请输入至少 1 个单词");
-          return;
-        }
-
-        words = [...lines];
-
-        renderWordGrid();
-        startPoisonSelection();
-        gameStatus.textContent = "请第一组同学选择毒药，第二位同学闭眼";
-      }
-
-      // 渲染单词网格
-      function renderWordGrid() {
-        wordGrid.innerHTML = "";
-
-        words.forEach((word, index) => {
-          const cell = document.createElement("div");
-          cell.className = "word-cell";
-          cell.textContent = word;
-          cell.dataset.index = index;
-
-          cell.addEventListener("click", handleCellClick);
-          wordGrid.appendChild(cell);
-        });
-
-        if (!words.length) {
-          gameStatus.textContent = "还没有单词，请先导入或输入单词";
-        }
-      }
-
-      // 开始毒药选择
-      function startPoisonSelection() {
-        gameState = "team1Poison";
-      }
-
-      // 处理单元格点击
-      function handleCellClick(event) {
-        const cell = event.currentTarget;
-        const index = parseInt(cell.dataset.index, 10);
-        const word = words[index];
-
-        if (gameState === "team1Poison") {
-          // 第一组选择毒药
-          team1PoisonWord = { index, word };
-          cell.classList.add("selected-poison");
-          selectedPoisonCells.push(cell);
-
-          // 隐藏毒药选择标记
-          setTimeout(() => {
-            selectedPoisonCells.forEach((c) =>
-              c.classList.remove("selected-poison"),
-            );
-            selectedPoisonCells = [];
-
-            gameState = "team2Poison";
-            gameStatus.textContent = "请第二位同学选择毒药，第一位同学闭眼";
-          }, 300); // 将延迟时间缩短为 300 毫秒
-        } else if (gameState === "team2Poison") {
-          // 第二组选择毒药
-          team2PoisonWord = { index, word };
-          cell.classList.add("selected-poison");
-          selectedPoisonCells.push(cell);
-
-          // 隐藏毒药选择标记
-          setTimeout(() => {
-            selectedPoisonCells.forEach((c) =>
-              c.classList.remove("selected-poison"),
-            );
-            selectedPoisonCells = [];
-
-            gameState = "playing";
-            gameStatus.textContent = "请开始游戏！两组轮流点击单词";
-          }, 300); // 将延迟时间缩短为 300 毫秒
-        } else if (gameState === "playing") {
-          // 游戏进行中
-          if (cell.classList.contains("poisoned")) return;
-
-          // 检查是否点到毒药
-          const isTeam1Poison = team1PoisonWord.index === index;
-          const isTeam2Poison = team2PoisonWord.index === index;
-
-          if (isTeam1Poison || isTeam2Poison) {
-            cell.classList.add("poisoned");
-
-            // 显示通知
-            notification.textContent = "啊，有毒！";
-            notification.style.display = "block";
-
-            setTimeout(() => {
-              notification.style.display = "none";
-              gameState = "gameOver";
-              gameStatus.textContent = `游戏结束！`;
-              restartBtn.disabled = false;
-              restartBtn.classList.remove("btn-disabled");
-            }, 2000);
-          } else {
-            // 普通单词，标记为已选，背景变绿色
-            cell.style.background = "green";
-            cell.style.opacity = "0.6";
-            cell.style.cursor = "not-allowed";
-          }
-        }
-      }
-
-      // 重新开始游戏
-      function restartGame() {
-        restartBtn.disabled = true;
-        restartBtn.classList.add("btn-disabled");
-
-        // 重置状态
-        team1PoisonWord = null;
-        team2PoisonWord = null;
-        selectedPoisonCells = [];
-
-        // 清除网格状态
-        const cells = wordGrid.querySelectorAll(".word-cell");
-        cells.forEach((cell) => {
-          cell.classList.remove("selected-poison", "poisoned");
-          cell.style.opacity = "1";
-          cell.style.cursor = "pointer";
-          cell.style.background = ""; // 重置背景颜色
-        });
-
-        startPoisonSelection();
-        gameStatus.textContent = "请第一位同学选择毒药，第二位同学闭眼";
-      }
-    });
-  </script>
-</body>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="script.js"></script>
+  </body>
 </html>
+
