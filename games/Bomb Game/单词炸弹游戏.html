@@ -1,0 +1,1043 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>单词炸弹游戏</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1400px;
+        width: 100%;
+        background-color: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+        padding: 40px;
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      h1 {
+        color: #2c3e50;
+        margin-top: 0;
+        font-size: 32px;
+        background: linear-gradient(90deg, #2575fc, #6a11cb);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .score-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 20px;
+        gap: 20px;
+      }
+
+      .score {
+        font-size: 36px;
+        font-weight: bold;
+        background: linear-gradient(90deg, #00b09b, #96c93d);
+        color: white;
+        padding: 10px 30px;
+        border-radius: 50px;
+        box-shadow: 0 5px 15px rgba(0, 176, 155, 0.3);
+      }
+
+      .btn {
+        background: linear-gradient(90deg, #00b09b, #96c93d);
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        font-size: 18px;
+        border-radius: 50px;
+        cursor: pointer;
+        font-weight: bold;
+        box-shadow: 0 5px 15px rgba(0, 176, 155, 0.3);
+        transition: all 0.3s ease;
+      }
+
+      .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 176, 155, 0.4);
+      }
+
+      .btn:active {
+        transform: translateY(1px);
+      }
+
+      .btn.reset {
+        background: linear-gradient(90deg, #ff416c, #ff4b2b);
+        box-shadow: 0 5px 15px rgba(255, 75, 43, 0.3);
+      }
+
+      .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .back-home-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: linear-gradient(90deg, #00b09b, #96c93d);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 50px;
+        cursor: pointer;
+        font-weight: bold;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 5px 15px rgba(0, 176, 155, 0.3);
+        transition: all 0.3s ease;
+        z-index: 1000;
+      }
+
+      .back-home-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 176, 155, 0.4);
+      }
+
+      .back-home-btn:active {
+        transform: translateY(1px);
+      }
+
+      .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+        margin-top: 30px;
+      }
+
+      .card {
+        height: 240px;
+        perspective: 1000px;
+        cursor: pointer;
+      }
+
+      .card.flipped {
+        cursor: default;
+      }
+
+      .card.disabled {
+        cursor: not-allowed;
+        opacity: 0.7;
+      }
+
+      .card-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        transition: transform 0.6s;
+        transform-style: preserve-3d;
+        border-radius: 15px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      }
+
+      .card.flipped .card-inner {
+        transform: rotateY(180deg);
+      }
+
+      .card-front,
+      .card-back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        border-radius: 15px;
+        padding: 20px;
+      }
+
+      .card-front {
+        background: linear-gradient(135deg, #43cea2, #185a9d);
+        color: white;
+      }
+
+      .card-back {
+        background: linear-gradient(135deg, #ff7e5f, #feb47b);
+        color: white;
+        transform: rotateY(180deg);
+      }
+
+      .card-back.bomb {
+        background: linear-gradient(135deg, #ff416c, #ff4b2b);
+        animation: shake 0.5s;
+      }
+
+      .card-back.score {
+        background: linear-gradient(135deg, #00b09b, #96c93d);
+      }
+
+      @keyframes shake {
+        0%,
+        100% {
+          transform: rotateY(180deg) translateX(0);
+        }
+
+        25% {
+          transform: rotateY(180deg) translateX(-10px);
+        }
+
+        75% {
+          transform: rotateY(180deg) translateX(10px);
+        }
+      }
+
+      /* 爆炸动画层与粒子 */
+      .explosion {
+        position: absolute;
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        background: radial-gradient(
+          circle,
+          rgba(255, 230, 120, 0.95) 0%,
+          rgba(255, 140, 0, 0.85) 45%,
+          rgba(255, 0, 0, 0.6) 70%,
+          rgba(255, 0, 0, 0) 72%
+        );
+        pointer-events: none;
+        animation: explode 600ms ease-out forwards;
+        filter: blur(0.3px);
+      }
+
+      @keyframes explode {
+        0% {
+          transform: translate(-50%, -50%) scale(0.2);
+          opacity: 0.9;
+        }
+
+        50% {
+          transform: translate(-50%, -50%) scale(1.1);
+          opacity: 1;
+        }
+
+        100% {
+          transform: translate(-50%, -50%) scale(1.6);
+          opacity: 0;
+        }
+      }
+
+      .particle {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background: radial-gradient(
+          circle,
+          #fff59d 0%,
+          #ff9800 60%,
+          #f44336 100%
+        );
+        border-radius: 50%;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        animation: fly 720ms ease-out forwards;
+      }
+
+      @keyframes fly {
+        0% {
+          transform: translate(-50%, -50%) scale(0.7);
+          opacity: 1;
+        }
+
+        100% {
+          transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty)))
+            scale(0.4);
+          opacity: 0;
+        }
+      }
+
+      .number {
+        font-size: 36px;
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+
+      .word {
+        font-size: 42px;
+        font-weight: bold;
+      }
+
+      .bomb-icon {
+        font-size: 80px;
+        margin-bottom: 10px;
+      }
+
+      .score-value {
+        font-size: 50px;
+        font-weight: bold;
+      }
+
+      .input-section {
+        background-color: #f8f9fa;
+        border-radius: 15px;
+        padding: 20px;
+        margin-top: 30px;
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+        transition:
+          max-height 0.5s ease,
+          padding 0.5s ease,
+          margin 0.5s ease;
+        max-height: 500px;
+        overflow: hidden;
+      }
+
+      .input-section.hidden {
+        max-height: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        margin-top: 10px;
+      }
+
+      h2 {
+        color: #2c3e50;
+        margin-top: 0;
+        text-align: center;
+      }
+
+      .word-inputs {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+      }
+
+      .input-group {
+        display: flex;
+        flex-direction: column;
+      }
+
+      label {
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #3498db;
+      }
+
+      input {
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: border-color 0.3s;
+      }
+
+      input:focus {
+        border-color: #3498db;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+      }
+
+      .game-over {
+        text-align: center;
+        margin-top: 20px;
+        padding: 20px;
+        background: linear-gradient(135deg, #ff416c, #ff4b2b);
+        color: white;
+        border-radius: 15px;
+        font-size: 24px;
+        font-weight: bold;
+        display: none;
+      }
+
+      .game-over.show {
+        display: block;
+        animation: fadeIn 0.5s;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .instructions {
+        background-color: #e3f2fd;
+        border-left: 4px solid #2196f3;
+        padding: 15px;
+        border-radius: 0 8px 8px 0;
+        margin-top: 25px;
+        font-size: 15px;
+      }
+
+      .instructions h3 {
+        margin-top: 0;
+        color: #0d47a1;
+      }
+
+      .instructions ol {
+        padding-left: 20px;
+        margin-bottom: 0;
+      }
+
+      .instructions li {
+        margin-bottom: 8px;
+      }
+
+      @media (max-width: 768px) {
+        .cards-grid,
+        .word-inputs {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (max-width: 480px) {
+        .cards-grid,
+        .word-inputs {
+          grid-template-columns: 1fr;
+        }
+
+        .score {
+          font-size: 28px;
+          padding: 8px 20px;
+        }
+
+        .btn {
+          padding: 10px 20px;
+          font-size: 16px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <a href="../../index.html" class="back-home-btn">🏠 返回首页</a>
+    <div class="container">
+      <header>
+        <h1>单词炸弹游戏 💣</h1>
+      </header>
+
+      <div class="score-container">
+        <div class="score" id="scoreDisplay" style="display: none">积分: 0</div>
+        <button class="btn" id="startBtn">开始游戏</button>
+        <button class="btn reset" id="resetBtn">重置</button>
+        <div style="display: flex; align-items: center; gap: 8px">
+          <label for="bombCountInput" style="font-weight: bold; color: #2c3e50"
+            >炸弹数量</label
+          >
+          <input
+            id="bombCountInput"
+            type="number"
+            min="1"
+            value="1"
+            style="
+              width: 80px;
+              padding: 8px;
+              border: 2px solid #e0e0e0;
+              border-radius: 8px;
+              font-size: 16px;
+            "
+          />
+          <button
+            class="btn"
+            id="toggleInputBtn"
+            style="
+              padding: 8px 16px;
+              font-size: 16px;
+              background: linear-gradient(90deg, #ffa62e, #ff3c38);
+            "
+          >
+            隐藏单词输入
+          </button>
+        </div>
+      </div>
+
+      <div class="game-over" id="gameOver">游戏结束！你踩到了炸弹💣</div>
+
+      <div class="cards-grid" id="cardsContainer">
+        <!-- Cards will be generated here -->
+      </div>
+
+      <div class="input-section" id="inputSection">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+          "
+        >
+          <h2 style="margin: 0">单词输入</h2>
+          <div style="display: flex; gap: 10px">
+            <button
+              class="btn"
+              id="addWordBtn"
+              style="
+                padding: 8px 20px;
+                font-size: 16px;
+                background: linear-gradient(90deg, #4facfe, #00f2fe);
+              "
+            >
+              + 增加单词
+            </button>
+            <button
+              class="btn"
+              id="removeWordBtn"
+              style="
+                padding: 8px 20px;
+                font-size: 16px;
+                background: linear-gradient(90deg, #fa709a, #fee140);
+              "
+            >
+              - 删除单词
+            </button>
+          </div>
+        </div>
+        <div class="word-inputs" id="wordInputs">
+          <!-- Word inputs will be generated here -->
+        </div>
+      </div>
+
+      <div class="instructions">
+        <h3>游戏规则</h3>
+        <ol>
+          <li>在下方输入框中输入英语单词（每个数字对应一个单词）</li>
+          <li>点击"开始游戏"按钮开始游戏</li>
+          <li>点击卡片翻开，可能会显示：积分（+1到+3）或炸弹💣</li>
+          <li>翻开积分卡片可以获得相应积分（不显示积分汇总）</li>
+          <li>翻开炸弹卡片会提示“踩到炸弹”，但游戏继续</li>
+          <li>每轮游戏中有多个炸弹（上方“炸弹数量”可配置）</li>
+          <li>点击"重置"按钮可以重新开始游戏</li>
+        </ol>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const cardsContainer = document.getElementById("cardsContainer");
+        const wordInputsContainer = document.getElementById("wordInputs");
+        const startBtn = document.getElementById("startBtn");
+        const resetBtn = document.getElementById("resetBtn");
+        const scoreDisplay = document.getElementById("scoreDisplay");
+        const gameOverDiv = document.getElementById("gameOver");
+        const inputSection = document.getElementById("inputSection");
+        const bombCountInput = document.getElementById("bombCountInput");
+        const toggleInputBtn = document.getElementById("toggleInputBtn");
+
+        let wordCount = 9; // 默认单词数量
+        let score = 0;
+        let gameStarted = false;
+        let gameOver = false;
+        let cards = []; // 存储卡片数据
+        let bombIndices = new Set(); // 炸弹位置集合
+        let bombCount = 1; // 炸弹数量
+        let isInputHidden = false; // 是否隐藏输入区
+
+        // 创建音频上下文
+        let audioContext = new (window.AudioContext ||
+          window.webkitAudioContext)();
+
+        function ensureAudioContext() {
+          if (audioContext.state === "suspended") {
+            audioContext.resume();
+          }
+        }
+
+        // --- 本地存储 ---
+        function saveToLocalStorage() {
+          const words = [];
+          for (let i = 1; i <= wordCount; i++) {
+            const input = document.getElementById(`word-${i}`);
+            words.push(input ? input.value : "");
+          }
+          const dataToSave = {
+            words: words,
+            wordCount: wordCount,
+            bombCount: bombCount,
+            isInputHidden: isInputHidden,
+          };
+          try {
+            localStorage.setItem("wordBombGame", JSON.stringify(dataToSave));
+          } catch (err) {
+            console.error("Failed to save to localStorage:", err);
+          }
+        }
+
+        function loadFromLocalStorage() {
+          try {
+            const saved = localStorage.getItem("wordBombGame");
+            if (saved) return JSON.parse(saved);
+          } catch (err) {
+            console.error("Failed to load from localStorage:", err);
+          }
+          return null;
+        }
+
+        // 播放音效
+        function playSound(frequency, duration, type = "sine") {
+          ensureAudioContext();
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+
+          oscillator.frequency.value = frequency;
+          oscillator.type = type;
+
+          gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+          gainNode.gain.linearRampToValueAtTime(
+            0.3,
+            audioContext.currentTime + 0.01,
+          );
+          gainNode.gain.exponentialRampToValueAtTime(
+            0.01,
+            audioContext.currentTime + duration,
+          );
+
+          oscillator.start(audioContext.currentTime);
+          oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        // 炸弹音效
+        function playBombSound() {
+          ensureAudioContext();
+          // 播放低沉的爆炸音效
+          const frequencies = [100, 80, 60];
+          frequencies.forEach((freq, index) => {
+            setTimeout(() => {
+              playSound(freq, 0.3, "sawtooth");
+            }, index * 50);
+          });
+        }
+
+        // 积分音效
+        function playScoreSound() {
+          const frequencies = [523.25, 659.25, 783.99];
+          frequencies.forEach((freq, index) => {
+            setTimeout(() => {
+              playSound(freq, 0.15, "sine");
+            }, index * 80);
+          });
+        }
+
+        function getUniqueRandomIndices(count, maxExclusive) {
+          const indices = new Set();
+          while (indices.size < count) {
+            indices.add(Math.floor(Math.random() * maxExclusive));
+          }
+          return indices;
+        }
+
+        // 初始化游戏卡片：N个炸弹，其余全部为积分（1~3）
+        function initializeCards() {
+          const maxBombs = Math.max(
+            1,
+            Math.min(bombCount, Math.max(1, wordCount - 1)),
+          );
+          bombIndices = getUniqueRandomIndices(maxBombs, wordCount);
+          cards = [];
+          for (let i = 0; i < wordCount; i++) {
+            if (bombIndices.has(i)) {
+              cards.push({ type: "bomb", value: null });
+            } else {
+              const scoreValue = Math.floor(Math.random() * 3) + 1; // 1-3
+              cards.push({ type: "score", value: scoreValue });
+            }
+          }
+        }
+
+        // 创建单词输入和卡片
+        function createWordInputAndCard(index) {
+          const i = index + 1;
+
+          // 创建输入框
+          const inputGroup = document.createElement("div");
+          inputGroup.className = "input-group";
+
+          const label = document.createElement("label");
+          label.textContent = `单词 ${i}:`;
+
+          const input = document.createElement("input");
+          input.type = "text";
+          input.id = `word-${i}`;
+          input.placeholder = `输入单词 ${i}`;
+
+          inputGroup.appendChild(label);
+          inputGroup.appendChild(input);
+          wordInputsContainer.appendChild(inputGroup);
+
+          // 创建卡片
+          const card = document.createElement("div");
+          card.className = "card";
+          card.dataset.index = index;
+          card.dataset.number = i;
+
+          const cardInner = document.createElement("div");
+          cardInner.className = "card-inner";
+
+          const cardFront = document.createElement("div");
+          cardFront.className = "card-front";
+
+          const wordFront = document.createElement("div");
+          wordFront.className = "word";
+          wordFront.textContent = "";
+          wordFront.id = `front-word-${i}`;
+
+          cardFront.appendChild(wordFront);
+
+          const cardBack = document.createElement("div");
+          cardBack.className = "card-back";
+
+          cardInner.appendChild(cardFront);
+          cardInner.appendChild(cardBack);
+          card.appendChild(cardInner);
+          cardsContainer.appendChild(card);
+
+          // 添加点击事件
+          card.addEventListener("click", function () {
+            if (
+              !gameStarted ||
+              gameOver ||
+              this.classList.contains("flipped")
+            ) {
+              return;
+            }
+
+            const cardIndex = parseInt(this.dataset.index);
+            const cardData = cards[cardIndex];
+
+            // 显示卡片内容
+            showCardContent(card, cardData, i);
+
+            // 翻转卡片
+            this.classList.add("flipped");
+
+            // 处理游戏逻辑
+            handleCardClick(card, cardData);
+          });
+
+          // 同步输入到卡片正面单词显示（仅显示单词，不显示序号）
+          input.addEventListener("input", function () {
+            wordFront.textContent = this.value.trim();
+            saveToLocalStorage();
+          });
+        }
+
+        // 显示卡片内容
+        function showCardContent(card, cardData, number) {
+          const cardBack = card.querySelector(".card-back");
+
+          // 清空并重建：先移除状态类，确保样式干净
+          cardBack.classList.remove("bomb", "score");
+          cardBack.innerHTML = "";
+
+          // 根据类型显示内容
+          if (cardData.type === "bomb") {
+            cardBack.classList.add("bomb");
+            const bombIcon = document.createElement("div");
+            bombIcon.className = "bomb-icon";
+            bombIcon.textContent = "💣";
+            cardBack.appendChild(bombIcon);
+          } else if (cardData.type === "score") {
+            cardBack.classList.add("score");
+            const scoreValue = document.createElement("div");
+            scoreValue.className = "score-value";
+            scoreValue.textContent = `+${cardData.value}`;
+            cardBack.appendChild(scoreValue);
+          }
+        }
+
+        // 处理卡片点击
+        function handleCardClick(card, cardData) {
+          if (cardData.type === "bomb") {
+            // 炸弹 - 提示但不结束游戏
+            gameOverDiv.textContent = "踩到炸弹了！💣";
+            gameOverDiv.classList.add("show");
+            playBombSound();
+
+            // 在该卡片背面触发爆炸动画
+            const cardBack = card.querySelector(".card-back");
+            triggerExplosion(cardBack);
+            setTimeout(() => {
+              gameOverDiv.classList.remove("show");
+            }, 1200);
+          } else if (cardData.type === "score") {
+            // 积分（不显示总分，仅播放音效）
+            score += cardData.value;
+            playScoreSound();
+          }
+        }
+
+        function triggerExplosion(container) {
+          if (!container) return;
+          // 爆炸核心
+          const boom = document.createElement("div");
+          boom.className = "explosion";
+          container.appendChild(boom);
+
+          // 粒子群
+          const particles = 14; // 适中数量
+          for (let i = 0; i < particles; i++) {
+            const p = document.createElement("div");
+            p.className = "particle";
+            // 随机方向与距离
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 40 + Math.random() * 70; // 40~110px
+            const tx = Math.cos(angle) * distance;
+            const ty = Math.sin(angle) * distance;
+            p.style.setProperty("--tx", tx + "px");
+            p.style.setProperty("--ty", ty + "px");
+            container.appendChild(p);
+          }
+
+          // 清理
+          setTimeout(() => {
+            boom.remove();
+            const addedParticles = container.querySelectorAll(".particle");
+            addedParticles.forEach((el) => el.remove());
+          }, 800);
+        }
+
+        // 禁用所有卡片
+        function disableAllCards() {
+          document.querySelectorAll(".card").forEach((card) => {
+            card.classList.add("disabled");
+          });
+        }
+
+        // 启用所有卡片
+        function enableAllCards() {
+          document.querySelectorAll(".card").forEach((card) => {
+            card.classList.remove("disabled");
+          });
+        }
+
+        // 更新积分显示
+        function updateScoreDisplay() {
+          scoreDisplay.textContent = `积分: ${score}`;
+        }
+
+        // 添加单词
+        function addWordInputAndCard() {
+          wordCount++;
+          createWordInputAndCard(wordCount - 1);
+          updateBombCountConstraints();
+          saveToLocalStorage();
+        }
+
+        // 删除单词
+        function removeWordInputAndCard() {
+          if (wordCount <= 1) {
+            alert("至少需要保留1个单词！");
+            return;
+          }
+
+          const i = wordCount;
+          const input = document.getElementById(`word-${i}`);
+          if (input) {
+            input.closest(".input-group").remove();
+          }
+
+          const card = document.querySelector(`.card[data-number="${i}"]`);
+          if (card) {
+            card.remove();
+          }
+
+          wordCount--;
+          updateBombCountConstraints();
+          saveToLocalStorage();
+        }
+
+        // 开始游戏
+        function startGame() {
+          if (gameOver) {
+            return;
+          }
+
+          // 检查是否有单词输入
+          let hasWords = false;
+          for (let i = 1; i <= wordCount; i++) {
+            const input = document.getElementById(`word-${i}`);
+            if (input && input.value.trim()) {
+              hasWords = true;
+              break;
+            }
+          }
+
+          if (!hasWords) {
+            alert("请至少输入一个单词！");
+            return;
+          }
+
+          // 读取炸弹数量并校正
+          const inputVal = parseInt(bombCountInput.value, 10);
+          const maxAllowed = Math.max(1, wordCount - 1);
+          bombCount = Number.isFinite(inputVal) ? inputVal : 1;
+          if (bombCount < 1) bombCount = 1;
+          if (bombCount > maxAllowed) bombCount = maxAllowed;
+          bombCountInput.value = bombCount;
+
+          gameStarted = true;
+          gameOver = false;
+          score = 0;
+          updateScoreDisplay();
+          gameOverDiv.classList.remove("show");
+
+          // 重置所有卡片（正面显示单词，背面清空）
+          document.querySelectorAll(".card").forEach((card) => {
+            card.classList.remove("flipped", "disabled");
+            const cardBack = card.querySelector(".card-back");
+            cardBack.classList.remove("bomb", "score");
+            cardBack.innerHTML = "";
+          });
+
+          enableAllCards();
+          initializeCards();
+          startBtn.disabled = true;
+        }
+
+        // 重置游戏
+        function resetGame() {
+          gameStarted = false;
+          gameOver = false;
+          score = 0;
+          updateScoreDisplay();
+          gameOverDiv.classList.remove("show");
+
+          document.querySelectorAll(".card").forEach((card) => {
+            card.classList.remove("flipped", "disabled");
+            const cardBack = card.querySelector(".card-back");
+            cardBack.classList.remove("bomb", "score");
+            cardBack.innerHTML = "";
+          });
+
+          enableAllCards();
+          startBtn.disabled = false;
+        }
+
+        // 初始化UI
+        function initializeUI() {
+          cardsContainer.innerHTML = "";
+          wordInputsContainer.innerHTML = "";
+
+          for (let i = 0; i < wordCount; i++) {
+            createWordInputAndCard(i);
+          }
+
+          updateBombCountConstraints();
+        }
+
+        function updateBombCountConstraints() {
+          const maxAllowed = Math.max(1, wordCount - 1);
+          bombCountInput.setAttribute("max", String(maxAllowed));
+          const val = parseInt(bombCountInput.value, 10);
+          if (!Number.isFinite(val) || val < 1) bombCountInput.value = "1";
+          if (val > maxAllowed) bombCountInput.value = String(maxAllowed);
+        }
+
+        bombCountInput.addEventListener("change", function () {
+          updateBombCountConstraints();
+          // 同步到内存并保存
+          const val = parseInt(bombCountInput.value, 10);
+          if (Number.isFinite(val)) bombCount = val;
+          saveToLocalStorage();
+        });
+
+        function updateInputSectionVisibility() {
+          if (isInputHidden) {
+            inputSection.classList.add("hidden");
+            toggleInputBtn.textContent = "显示单词输入";
+          } else {
+            inputSection.classList.remove("hidden");
+            toggleInputBtn.textContent = "隐藏单词输入";
+          }
+        }
+        toggleInputBtn.addEventListener("click", function () {
+          isInputHidden = !isInputHidden;
+          updateInputSectionVisibility();
+          saveToLocalStorage();
+        });
+
+        // 事件监听
+        startBtn.addEventListener("click", startGame);
+        resetBtn.addEventListener("click", resetGame);
+
+        document
+          .getElementById("addWordBtn")
+          .addEventListener("click", function () {
+            addWordInputAndCard();
+          });
+
+        document
+          .getElementById("removeWordBtn")
+          .addEventListener("click", function () {
+            removeWordInputAndCard();
+          });
+
+        // 初始化（从本地读取数据）
+        const savedData = loadFromLocalStorage();
+        if (
+          savedData &&
+          typeof savedData.wordCount === "number" &&
+          savedData.wordCount > 0
+        ) {
+          wordCount = savedData.wordCount;
+        }
+        initializeUI();
+
+        // 恢复单词与炸弹数量
+        if (savedData) {
+          if (Array.isArray(savedData.words)) {
+            savedData.words.forEach((w, idx) => {
+              const i = idx + 1;
+              const input = document.getElementById(`word-${i}`);
+              const front = document.getElementById(`front-word-${i}`);
+              if (input) input.value = w || "";
+              if (front) front.textContent = (w || "").trim();
+            });
+          }
+          if (typeof savedData.bombCount === "number") {
+            bombCount = savedData.bombCount;
+            bombCountInput.value = String(bombCount);
+            updateBombCountConstraints();
+          }
+          if (typeof savedData.isInputHidden === "boolean") {
+            isInputHidden = savedData.isInputHidden;
+            updateInputSectionVisibility();
+          } else {
+            updateInputSectionVisibility();
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
