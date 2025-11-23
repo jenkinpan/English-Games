@@ -140,24 +140,28 @@
         position: fixed;
         bottom: 20px;
         right: 20px;
+        width: 50px;
+        height: 50px;
         background: linear-gradient(90deg, #00b09b, #96c93d);
         color: white;
         border: none;
-        padding: 10px 20px;
-        font-size: 16px;
-        border-radius: 50px;
+        padding: 0;
+        font-size: 1.5rem;
+        border-radius: 50%;
         cursor: pointer;
         font-weight: bold;
         text-decoration: none;
-        display: inline-flex;
+        display: flex;
         align-items: center;
-        gap: 8px;
+        justify-content: center;
         box-shadow: 0 5px 15px rgba(0, 176, 155, 0.3);
         transition: all 0.3s ease;
         z-index: 1000;
+        opacity: 0.5;
       }
 
       .back-home-btn:hover {
+        opacity: 1;
         transform: translateY(-3px);
         box-shadow: 0 8px 20px rgba(0, 176, 155, 0.4);
       }
@@ -348,7 +352,7 @@
   </head>
 
   <body>
-    <a href="../../index.html" class="back-home-btn">🏠 返回首页</a>
+    <a href="../../index.html" class="back-home-btn">🏠</a>
     <div class="container">
       <header>
         <h1>英语单词记忆卡片</h1>

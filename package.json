@@ -1,6 +1,6 @@
 {
   "name": "english-games",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "英语互动游戏中心 - 桌面应用",
   "main": "main.js",
   "scripts": {
@@ -20,8 +20,8 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^28.0.0",
-    "electron-builder": "^24.9.1"
+    "electron": "^28.3.3",
+    "electron-builder": "^24.13.3"
   },
   "build": {
     "appId": "com.englishgames.app",
@@ -57,4 +57,3 @@
     }
   }
 }
-
