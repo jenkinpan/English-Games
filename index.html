@@ -30,6 +30,8 @@
       flex-direction: column;
       align-items: center;
       padding: 40px 16px 80px;
+      padding-top: 60px;
+      /* 增加顶部内边距，为拖动区域留出空间 */
       background-image: radial-gradient(circle at 20% 20%,
           rgba(92, 106, 196, 0.08),
           transparent 30%),
@@ -42,6 +44,10 @@
       text-align: center;
       max-width: 640px;
       margin-bottom: 32px;
+      -webkit-app-region: drag;
+      /* 使顶部区域可拖动窗口 */
+      padding-top: 20px;
+      /* 为拖动区域增加一些顶部空间 */
     }
 
     h1 {
@@ -59,6 +65,8 @@
 
     main.grid {
       flex: 1;
+      -webkit-app-region: no-drag;
+      /* 主内容区域不可拖动 */
     }
 
     .grid {
@@ -78,6 +86,8 @@
       box-shadow: 0 15px 45px rgba(51, 64, 97, 0.15);
       transition: transform 180ms ease, box-shadow 180ms ease;
       border: 1px solid rgba(92, 106, 196, 0.12);
+      -webkit-app-region: no-drag;
+      /* 卡片区域不可拖动，保持可点击 */
     }
 
     .card:hover {
@@ -105,6 +115,8 @@
       font-size: 0.9rem;
       color: rgba(0, 0, 0, 0.6);
       text-align: center;
+      -webkit-app-region: no-drag;
+      /* 页脚区域不可拖动 */
     }
 
     @media (prefers-color-scheme: dark) {
